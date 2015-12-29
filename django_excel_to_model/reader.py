@@ -3,7 +3,8 @@ from datetime import datetime, tzinfo
 import pytz
 from xlrd import open_workbook, cellname, XL_CELL_DATE, xldate_as_tuple, XL_CELL_NUMBER
 from django.utils import timezone
-from excel_reader.field_tools import get_target_field_name, get_valid_field_name
+
+from django_excel_to_model.field_tools import get_valid_field_name
 
 
 class Excel(object):
