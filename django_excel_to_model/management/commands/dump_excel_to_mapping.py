@@ -9,6 +9,8 @@ from libtool.folder_file_processor import FolderFileProcessor
 
 
 class ModelCreator(object):
+    reserved_keywords = ["type", ]
+
     def __init__(self, full_path, header_row_start_from_0=0):
         super(ModelCreator, self).__init__()
         # self.mapping = mapping_dict
@@ -35,10 +37,10 @@ class ModelCreator(object):
             for key in attr_order:
                 if key == "":
                     continue
-                field_name = get_valid_field_name(key)
+                help_text = get_valid_field_name(key)
                 first_part = u'%s%s = models.CharField(max_length=TEXT_LENGTH_256, help_text=_("""' % \
                              (u" " * 4, mapping[key])
-                declaration = first_part + field_name + u'"""), null=True, blank=True)'
+                declaration = first_part + help_text + u'"""), null=True, blank=True)'
                 res.append(declaration)
             break
         res.append(u'    data_import_id = models.CharField(max_length=TEXT_LENGTH_128, '
@@ -49,17 +51,29 @@ class ModelCreator(object):
     def create_mapping(self, target_mapping_name="mapping"):
         self.mapping_code_lines = ["%s = {" % target_mapping_name, ]
 
-        for col in self.header:
-            if col == "":
-                self.mapping_dict[u""] = self.invalid_field_name
-            else:
-                field_name = get_valid_field_name(col)
-                self.mapping_dict[field_name] = (get_target_field_name(col)).lower()
+        self.create_field_title_to_attr_name_mapping()
 
         for key in self.mapping_dict:
             self.mapping_code_lines.append(u" "*4+'u"""%s""": u"%s",' % (key, self.mapping_dict[key]))
 
         self.mapping_code_lines.append("}")
+
+    def create_field_title_to_attr_name_mapping(self):
+        for col in self.header:
+            if col == "":
+                self.mapping_dict[u""] = self.invalid_field_name
+            else:
+                field_title_str = get_valid_field_name(col)
+                model_attribute_name = self.get_attribute_name(col)
+                self.mapping_dict[field_title_str] = model_attribute_name
+
+    def get_attribute_name(self, col):
+        model_attribute_name = get_target_field_name(col).lower()
+        if model_attribute_name in self.reserved_keywords:
+            model_attribute_name += "item_"
+        if model_attribute_name in self.mapping_code_lines:
+            model_attribute_name += "another"
+        return model_attribute_name
 
     def create_attr_list_code_lines(self):
         self.attr_list_code_lines.append("attr_order = [")
