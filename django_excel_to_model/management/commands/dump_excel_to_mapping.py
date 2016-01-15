@@ -2,7 +2,6 @@ import os
 # from excel_reader.openpyxl_reader import ExcelFile
 
 from django.core.management.base import BaseCommand, CommandError
-
 from django_excel_to_model.field_tools import get_valid_field_name, get_target_field_name
 from django_excel_to_model.reader import ExcelFile
 from libtool.folder_file_processor import FolderFileProcessor
@@ -10,11 +9,14 @@ from libtool.folder_file_processor import FolderFileProcessor
 
 class ModelCreator(object):
     reserved_keywords = ["type", ]
+    MAX_RECORD_LENGTH = 64000
 
     def __init__(self, full_path, header_row_start_from_0=0, sheet_index_numbered_from_0=0, class_name="YourClass"):
         super(ModelCreator, self).__init__()
         # self.mapping = mapping_dict
         # self.attr_order = attr_order_list
+        self.field_num = 0
+        self.indents = u" " * 4
         self.attr_list = []
         self.mapping_dict = {}
         self.model_code_lines = []
@@ -31,23 +33,41 @@ class ModelCreator(object):
         attr_order = None
         mapping = None
         exec code
-        res = [u"", u"", u"from django.db import models", u"from django.utils.translation import ugettext as _",
-               u"from excel_reader.len_definitions import TEXT_LENGTH_256, TEXT_LENGTH_128", u"", u"",
+
+        field_len_definition = self.get_default_field_len_definition()
+
+        res = [u"", u"",
+               u"from django.db import models",
+               u"from django.utils.translation import ugettext as _",
+               u"from excel_reader.len_definitions import %s, TEXT_LENGTH_128" % field_len_definition,
+               u"",
+               u"",
                u"class %s(models.Model):" % self.class_name]
         for row_data_dict in self.worksheet.enumerate(data_start_row):
             for key in attr_order:
                 if key == "":
                     continue
                 help_text = get_valid_field_name(key)
-                first_part = u'%s%s = models.CharField(max_length=TEXT_LENGTH_256, help_text=_("""' % \
-                             (u" " * 4, mapping[key])
+
+                first_part = u'%s%s = models.CharField(max_length=%s, help_text=_("""' % \
+                             (self.indents, mapping[key], field_len_definition)
                 declaration = first_part + help_text + u'"""), null=True, blank=True)'
                 res.append(declaration)
             break
-        res.append(u" " * 4+u'data_import_id = models.CharField(max_length=TEXT_LENGTH_128, '
-                   u'help_text=_("Id for this import"), null=True, blank=True)')
+        res.append(self.indents + u'data_import_id = models.CharField(max_length=TEXT_LENGTH_128, '
+                                  u'help_text=_("Id for this import"), null=True, blank=True)')
         self.model_code_lines = res
         return u"\n".join(res)
+
+    def get_default_field_len_definition(self):
+        max_len_for_each_field = int(self.MAX_RECORD_LENGTH / self.field_num)
+        if max_len_for_each_field == 0:
+            raise "Too many fields"
+        max_target_len = 4096
+        while (max_target_len & max_len_for_each_field) == 0:
+            max_target_len >>= 1
+        field_len_definition = u"TEXT_LENGTH_" + str(max_target_len)
+        return field_len_definition
 
     def create_mapping(self, target_mapping_name="mapping"):
         self.mapping_code_lines = ["%s = {" % target_mapping_name, ]
@@ -55,7 +75,8 @@ class ModelCreator(object):
         self.create_field_title_to_attr_name_mapping()
 
         for key in self.mapping_dict:
-            self.mapping_code_lines.append(u" "*4+'u"""%s""": u"%s",' % (key, self.mapping_dict[key]))
+            self.mapping_code_lines.append(self.indents + 'u"""%s""": u"%s",' % (key, self.mapping_dict[key]))
+            self.field_num += 1
 
         self.mapping_code_lines.append("}")
 
@@ -82,7 +103,7 @@ class ModelCreator(object):
             name = get_valid_field_name(unicode(col))
             if not (name in self.attr_list):
                 self.attr_list.append(name)
-                self.attr_list_code_lines.append('    u"""%s""",' % name)
+                self.attr_list_code_lines.append(self.indents + 'u"""%s""",' % name)
 
         self.attr_list_code_lines.append("]")
 
