@@ -5,6 +5,7 @@ from django.core.management.base import BaseCommand, CommandError
 from django_excel_to_model.field_tools import get_valid_field_name, get_target_field_name
 from django_excel_to_model.reader import ExcelFile
 from libtool.folder_file_processor import FolderFileProcessor
+import re
 
 
 class ModelCreator(object):
@@ -27,6 +28,7 @@ class ModelCreator(object):
         self.worksheet = excel_file.get_sheet(sheet_index_numbered_from_0)
         self.header = self.worksheet.get_header_raw(header_row_start_from_0)
         self.class_name = class_name
+        self.field_len_definition = 256
 
     def create_model(self, data_start_row=1):
         code = self.get_mapping_and_attr()
@@ -34,14 +36,7 @@ class ModelCreator(object):
         mapping = None
         exec code
 
-        field_len_definition = self.get_default_field_len_definition()
-
         res = [u"", u"",
-               u"from django.db import models",
-               u"from django.utils.translation import ugettext as _",
-               u"from excel_reader.len_definitions import %s, TEXT_LENGTH_128" % field_len_definition,
-               u"",
-               u"",
                u"class %s(models.Model):" % self.class_name]
         for row_data_dict in self.worksheet.enumerate(data_start_row):
             for key in attr_order:
@@ -50,7 +45,7 @@ class ModelCreator(object):
                 help_text = get_valid_field_name(key)
 
                 first_part = u'%s%s = models.CharField(max_length=%s, help_text=_("""' % \
-                             (self.indents, mapping[key], field_len_definition)
+                             (self.indents, mapping[key], self.field_len_definition)
                 declaration = first_part + help_text + u'"""), null=True, blank=True)'
                 res.append(declaration)
             break
@@ -80,6 +75,8 @@ class ModelCreator(object):
 
         self.mapping_code_lines.append("}")
 
+        self.field_len_definition = self.get_default_field_len_definition()
+
     def create_field_title_to_attr_name_mapping(self):
         for col in self.header:
             if col == "":
@@ -93,8 +90,10 @@ class ModelCreator(object):
         model_attribute_name = get_target_field_name(col).lower()
         if model_attribute_name in self.reserved_keywords:
             model_attribute_name += "item_"
-        if model_attribute_name in self.mapping_code_lines:
+        if model_attribute_name in self.mapping_dict:
             model_attribute_name += "another"
+        if not (re.match("^[0-9].+", model_attribute_name) is None):
+            model_attribute_name = "n"+model_attribute_name
         return model_attribute_name
 
     def create_attr_list_code_lines(self):
@@ -108,7 +107,13 @@ class ModelCreator(object):
         self.attr_list_code_lines.append("]")
 
     def get_mapping_and_attr(self):
-        res = self.mapping_code_lines + ["", ""] + self.attr_list_code_lines
+        res = [u"from django.db import models",
+               u"from django.utils.translation import ugettext as _",
+               u"from django_excel_to_model.len_definitions import %s, TEXT_LENGTH_128" % self.field_len_definition,
+               u"",
+               u""]
+        res += self.mapping_code_lines + ["", ""]
+        res += self.attr_list_code_lines
         return "\n".join(res)
 
     def create_mapping_for_excel(self):
