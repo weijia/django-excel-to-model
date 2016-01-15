@@ -11,7 +11,7 @@ from libtool.folder_file_processor import FolderFileProcessor
 class ModelCreator(object):
     reserved_keywords = ["type", ]
 
-    def __init__(self, full_path, header_row_start_from_0=0):
+    def __init__(self, full_path, header_row_start_from_0=0, sheet_index_numbered_from_0=0, class_name="YourClass"):
         super(ModelCreator, self).__init__()
         # self.mapping = mapping_dict
         # self.attr_order = attr_order_list
@@ -22,8 +22,9 @@ class ModelCreator(object):
         self.attr_list_code_lines = []
         self.mapping_code_lines = []
         excel_file = ExcelFile(full_path, False)
-        self.worksheet = excel_file.get_sheet(0)
+        self.worksheet = excel_file.get_sheet(sheet_index_numbered_from_0)
         self.header = self.worksheet.get_header_raw(header_row_start_from_0)
+        self.class_name = class_name
 
     def create_model(self, data_start_row=1):
         code = self.get_mapping_and_attr()
@@ -32,7 +33,7 @@ class ModelCreator(object):
         exec code
         res = [u"", u"", u"from django.db import models", u"from django.utils.translation import ugettext as _",
                u"from excel_reader.len_definitions import TEXT_LENGTH_256, TEXT_LENGTH_128", u"", u"",
-               u"class YourClassName(models.Model):"]
+               u"class %s(models.Model):" % self.class_name]
         for row_data_dict in self.worksheet.enumerate(data_start_row):
             for key in attr_order:
                 if key == "":
@@ -43,7 +44,7 @@ class ModelCreator(object):
                 declaration = first_part + help_text + u'"""), null=True, blank=True)'
                 res.append(declaration)
             break
-        res.append(u'    data_import_id = models.CharField(max_length=TEXT_LENGTH_128, '
+        res.append(u" " * 4+u'data_import_id = models.CharField(max_length=TEXT_LENGTH_128, '
                    u'help_text=_("Id for this import"), null=True, blank=True)')
         self.model_code_lines = res
         return u"\n".join(res)
@@ -78,7 +79,7 @@ class ModelCreator(object):
     def create_attr_list_code_lines(self):
         self.attr_list_code_lines.append("attr_order = [")
         for col in self.header:
-            name = get_valid_field_name(col)
+            name = get_valid_field_name(unicode(col))
             if not (name in self.attr_list):
                 self.attr_list.append(name)
                 self.attr_list_code_lines.append('    u"""%s""",' % name)

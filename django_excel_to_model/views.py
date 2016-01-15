@@ -18,6 +18,8 @@ def create_mapping(request):
     if form.is_valid():
         import_file = form.cleaned_data['import_file']
         header_row_numbered_from_1 = form.cleaned_data['header_row_numbered_from_1']
+        spreadsheet_numbered_from_1 = form.cleaned_data['spreadsheet_numbered_from_1']
+        class_name = form.cleaned_data['class_name']
 
         # first always write the uploaded file to disk as it may be a
         # memory file or else based on settings upload handlers
@@ -25,7 +27,7 @@ def create_mapping(request):
             for chunk in import_file.chunks():
                 uploaded_file.write(chunk)
             uploaded_file.close()
-            m = ModelCreator(uploaded_file.name, header_row_numbered_from_1-1)
+            m = ModelCreator(uploaded_file.name, header_row_numbered_from_1-1, spreadsheet_numbered_from_1-1, class_name)
             codes = m.create_mapping_for_excel()
             codes += m.create_model(data_start_row)
 

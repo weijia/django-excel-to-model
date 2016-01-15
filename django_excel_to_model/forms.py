@@ -8,3 +8,5 @@ class ExcelFormatTranslateForm(forms.Form):
         label=_('File to import')
     )
     header_row_numbered_from_1 = forms.IntegerField()
+    spreadsheet_numbered_from_1 = forms.IntegerField()
+    class_name = forms.CharField()
