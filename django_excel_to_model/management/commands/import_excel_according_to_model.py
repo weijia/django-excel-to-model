@@ -2,7 +2,6 @@ import argparse
 import importlib
 from django.contrib.contenttypes.models import ContentType
 from django.core.management.base import BaseCommand, CommandError
-
 from django_excel_to_model.reader import ExcelFile
 from libtool.inspect_utils import class_enumerator
 
@@ -17,22 +16,23 @@ class DictTranslator(object):
 
 
 class ExcelFileFromClassImporter(object):
-    def __init__(self, class_instance):
+    def __init__(self, class_instance, sheet_numbered_from_1=1):
         super(ExcelFileFromClassImporter, self).__init__()
         self.model_module = importlib.import_module(class_instance.__module__)
         self.class_instance = class_instance
         self.translator = DictTranslator()
+        self.sheet_numbered_from_1 = sheet_numbered_from_1
 
     def import_excel(self, full_path, header_row_numbered_from_1, first_import_row_numbered_from_1=1, count=1000):
         excel_file = ExcelFile(full_path, False)
-        sheet = excel_file.get_sheet(0)
+        sheet = excel_file.get_sheet(self.sheet_numbered_from_1-1)
         header = sheet.get_header_raw(header_row_numbered_from_1 - 1)
         # for class_instance in class_enumerator(self.model_module):
         #     new_item_class = class_instance
         cnt = 0
 
-        for item_info_dict in sheet.enumerate_mapped(
-            self.model_module.mapping, start_row=first_import_row_numbered_from_1 - 1):
+        for item_info_dict in sheet.enumerate_mapped(self.model_module.mapping,
+                                                     start_row=first_import_row_numbered_from_1 - 1):
             self.translator.translate(item_info_dict)
             self.class_instance.objects.get_or_create(**item_info_dict)
             cnt += 1
