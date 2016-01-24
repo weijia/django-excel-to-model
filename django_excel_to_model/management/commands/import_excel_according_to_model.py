@@ -1,5 +1,7 @@
 import argparse
 import importlib
+import os
+
 from django.contrib.contenttypes.models import ContentType
 from django.core.management.base import BaseCommand, CommandError
 from django_excel_to_model.reader import ExcelFile
@@ -25,6 +27,7 @@ class ExcelFileFromClassImporter(object):
 
     def import_excel(self, full_path, header_row_numbered_from_1, first_import_row_numbered_from_1=1, count=1000):
         excel_file = ExcelFile(full_path, False)
+        filename = os.path.basename(full_path)
         sheet = excel_file.get_sheet(self.sheet_numbered_from_1-1)
         header = sheet.get_header_raw(header_row_numbered_from_1 - 1)
         # for class_instance in class_enumerator(self.model_module):
@@ -34,6 +37,7 @@ class ExcelFileFromClassImporter(object):
         for item_info_dict in sheet.enumerate_mapped(self.model_module.mapping,
                                                      start_row=first_import_row_numbered_from_1 - 1):
             self.translator.translate(item_info_dict)
+            item_info_dict["data_import_id"] = filename
             self.class_instance.objects.get_or_create(**item_info_dict)
             cnt += 1
             # If count = 1, when 1 processed, cnt will become 1

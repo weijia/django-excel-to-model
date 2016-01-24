@@ -58,7 +58,7 @@ class ModelCreator(object):
         max_len_for_each_field = int(self.MAX_RECORD_LENGTH / self.field_num)
         if max_len_for_each_field == 0:
             raise "Too many fields"
-        max_target_len = 4096
+        max_target_len = 1024
         while (max_target_len & max_len_for_each_field) == 0:
             max_target_len >>= 1
         field_len_definition = u"TEXT_LENGTH_" + str(max_target_len)
