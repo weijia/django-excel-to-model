@@ -6,11 +6,13 @@ from django_excel_to_model.field_tools import get_valid_field_name, get_target_f
 from django_excel_to_model.reader import ExcelFile
 from libtool.folder_file_processor import FolderFileProcessor
 import re
+import random
 
 
 class ModelCreator(object):
     reserved_keywords = ["type", ]
     MAX_RECORD_LENGTH = 64000
+    MAX_FIELD_NAME_LENGTH = (64-5)
 
     def __init__(self, full_path, header_row_start_from_0=0, sheet_index_numbered_from_0=0, class_name="YourClass"):
         super(ModelCreator, self).__init__()
@@ -90,8 +92,10 @@ class ModelCreator(object):
         model_attribute_name = get_target_field_name(col).lower()
         if model_attribute_name in self.reserved_keywords:
             model_attribute_name += "item_"
+        if len(model_attribute_name)>self.MAX_FIELD_NAME_LENGTH:
+            model_attribute_name = model_attribute_name[0:self.MAX_FIELD_NAME_LENGTH]
         if model_attribute_name in self.mapping_dict:
-            model_attribute_name += "another"
+            model_attribute_name += "_%d" % random.randint(0, 999)
         if not (re.match("^[0-9].+", model_attribute_name) is None):
             model_attribute_name = "n"+model_attribute_name
         return model_attribute_name
