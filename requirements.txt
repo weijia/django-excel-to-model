@@ -1,2 +1,7 @@
-django>=1.8.0
+# django>=1.8.0
+xlrd
+django-filter==0.11.0
 # Additional requirements go here
+django-tables2==1.0.4
+django-tables2-reports
+django-bootstrap-form

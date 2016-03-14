@@ -1,5 +1,6 @@
 from django.conf.urls import patterns, url
 
+from django_excel_to_model.django_filter_template_view import DjangoFilterTemplateView
 from django_excel_to_model.views_import import upload_file
 from views import create_mapping
 
@@ -9,4 +10,5 @@ urlpatterns = patterns('',
                        #                                    'excel_reader/excel_mapping_generator.html')),
                        (r'^$', create_mapping),
                         url(r'^upload/', upload_file),
+                        url(r'^filter/', DjangoFilterTemplateView.as_view()),
                        )

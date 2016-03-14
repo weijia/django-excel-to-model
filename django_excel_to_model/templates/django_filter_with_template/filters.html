@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% load bootstrap %}
+{% load django_tables2 %}
+{% block content %}
+
+<form action="" method="get" class="form-inline">
+    {% csrf_token %}
+    <legend>Filter:</legend>
+    {{ filter.form|bootstrap}}<br/><br/>
+    <div class="form-group">
+        <!--<input type="submit" />-->
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </div>
+</form>
+ <!--Latest compiled and minified CSS -->
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.8.1/bootstrap-table.min.css">
+
+<!-- Latest compiled and minified JavaScript -->
+<script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.8.1/bootstrap-table.min.js"></script>
+
+<!-- Latest compiled and minified Locales -->
+<script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.8.1/locale/bootstrap-table-zh-CN.min.js"></script>
+<script>
+$(function (){
+    $('table').bootstrapTable();
+    $('table td:first-child').each(function(){
+        $(this).html('<a href="{{admin_base_url}}'.replace('%d', $(this).text())+'">'+$(this).text()+'</a>');
+    });
+});
+</script>
+{% render_table table %}
+{% endblock %}
