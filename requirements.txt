@@ -5,3 +5,4 @@ django-filter
 django-tables2
 django-tables2-reports
 django-bootstrap-form
+django-background-tasks
