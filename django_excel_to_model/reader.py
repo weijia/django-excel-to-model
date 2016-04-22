@@ -4,7 +4,7 @@ import pytz
 from xlrd import open_workbook, cellname, XL_CELL_DATE, xldate_as_tuple, XL_CELL_NUMBER
 from django.utils import timezone
 
-from django_excel_to_model.field_tools import get_valid_field_name
+from field_tools import get_valid_field_name
 
 
 class Excel(object):
