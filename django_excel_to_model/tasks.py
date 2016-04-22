@@ -5,7 +5,7 @@ from models import ExcelImportTask
 from django.contrib.auth.models import User
 
 
-@background()
+@background(schedule=10)
 def import_excel():
     # lookup user by id and send them a message
     # user = User.objects.get(pk=user_id)
@@ -28,7 +28,6 @@ def import_excel():
             task.next_process_line_numbered_from_1 = 0
         else:
             task.next_process_line_numbered_from_1 += 1000
+            import_excel()
         task.save()
 
-
-import_excel()

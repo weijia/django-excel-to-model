@@ -1,8 +1,7 @@
 from django.views.decorators.csrf import csrf_exempt
-from django.http import HttpResponseRedirect
 from django.shortcuts import render
-
 from django_excel_to_model.management.commands.import_excel_according_to_model import ExcelFileFromClassImporter
+from django_excel_to_model.tasks import import_excel
 from forms import ExcelImportTaskForm
 
 
@@ -27,6 +26,8 @@ def upload_file(request):
                                first_import_row_numbered_from_1, import_cnt)
                 instance.is_completed = True
                 instance.save()
+            else:
+                import_excel()
     else:
         form = ExcelImportTaskForm()
     return render(request, 'django_excel_to_model/upload.html',

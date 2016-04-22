@@ -18,5 +18,5 @@ class ExcelImportTaskForm(ModelForm):
     class Meta:
         model = ExcelImportTask
         fields = ['excel_file', 'content', "header_row_numbered_from_1", "spreadsheet_numbered_from_1"]
-    is_import_now = forms.BooleanField()
+    is_import_now = forms.BooleanField(required=False)
 

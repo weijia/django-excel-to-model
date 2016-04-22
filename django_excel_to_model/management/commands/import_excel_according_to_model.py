@@ -56,6 +56,13 @@ def import_excel_according_to_model(full_path, content_type_id, header_row_numbe
 class Command(BaseCommand):
     help = 'Import excel according to model info'
 
+    def add_arguments(self, parser):
+        parser.add_argument('file-path')
+        parser.add_argument('content-type-id')
+        parser.add_argument('header_row_numbered_from_1')
+        parser.add_argument('start')
+        parser.add_argument('count', nargs='?')
+
     def handle(self, *args, **options):
         parser = argparse.ArgumentParser(description='Import excel file according to model info')
 
@@ -73,7 +80,7 @@ class Command(BaseCommand):
         parser_import_excel_according_to_model.add_argument(
             'file-path', nargs=1, help='path of the excel file')
         parser_import_excel_according_to_model.add_argument(
-            'content-type-id', nargs=1, help='path of the excel file', type=int)
+            'content-type-id', nargs=1, help='content id of the model', type=int)
         parser_import_excel_according_to_model.add_argument(
             'header_row_numbered_from_1', nargs=1, help='header row number (start from 1)', type=int)
         parser_import_excel_according_to_model.add_argument(
