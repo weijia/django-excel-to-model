@@ -25,7 +25,7 @@ def import_excel():
         print "execute result:", res
         if res != 0:
             task.is_completed = True
-            task.next_process_line_numbered_from_1 = 0
+            # task.next_process_line_numbered_from_1 = 0
         else:
             task.next_process_line_numbered_from_1 += 1000
             import_excel()

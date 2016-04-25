@@ -38,7 +38,9 @@ class ExcelFileFromClassImporter(object):
                                                      start_row=first_import_row_numbered_from_1 - 1):
             self.translator.translate(item_info_dict)
             item_info_dict["data_import_id"] = filename
-            self.class_instance.objects.get_or_create(**item_info_dict)
+            target, is_created = self.class_instance.objects.get_or_create(**item_info_dict)
+            if not is_created:
+                print "item duplicated:", item_info_dict
             cnt += 1
             # If count = 1, when 1 processed, cnt will become 1
             if cnt > count:
