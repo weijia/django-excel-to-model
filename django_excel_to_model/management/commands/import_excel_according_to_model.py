@@ -94,13 +94,13 @@ class Command(BaseCommand):
         print vars(arg_result)["file-path"][0]
         print vars(arg_result)["content-type-id"][0]
         print vars(arg_result)["start"][0]
-        print vars(arg_result)["count"][0]
+        print vars(arg_result)["count"]
 
         file_path = vars(arg_result)["file-path"][0]
         content_type_id = vars(arg_result)["content-type-id"][0]
         header_row_numbered_from_1 = vars(arg_result)["header_row_numbered_from_1"][0]
         first_import_row_numbered_from_1 = vars(arg_result)["start"][0]
-        count = vars(arg_result)["count"][0]
+        count = vars(arg_result)["count"]
 
         return import_excel_according_to_model(
             file_path, content_type_id, header_row_numbered_from_1, first_import_row_numbered_from_1, count)
