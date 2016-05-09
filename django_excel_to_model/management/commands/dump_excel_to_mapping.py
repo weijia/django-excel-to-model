@@ -4,7 +4,7 @@ import os
 from django.core.management.base import BaseCommand, CommandError
 from django_excel_to_model.field_tools import get_valid_field_name, get_target_field_name
 from django_excel_to_model.reader import ExcelFile
-from libtool.folder_file_processor import FolderFileProcessor
+from ufs_tools.folder_file_processor import FolderFileProcessor
 import re
 import random
 
