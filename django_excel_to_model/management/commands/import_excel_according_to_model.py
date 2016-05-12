@@ -5,7 +5,7 @@ import os
 from django.contrib.contenttypes.models import ContentType
 from django.core.management.base import BaseCommand, CommandError
 from django_excel_to_model.reader import ExcelFile
-from ufs_tools.inspect_utils import class_enumerator
+# from ufs_tools.inspect_utils import class_enumerator
 
 
 class DictTranslator(object):
