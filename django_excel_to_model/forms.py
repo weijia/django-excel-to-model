@@ -12,6 +12,7 @@ class ExcelFormatTranslateForm(forms.Form):
     header_row_numbered_from_1 = forms.IntegerField()
     spreadsheet_numbered_from_1 = forms.IntegerField()
     class_name = forms.CharField()
+    is_create_app_now = forms.BooleanField(required=False)
 
 
 class ExcelImportTaskForm(ModelForm):
