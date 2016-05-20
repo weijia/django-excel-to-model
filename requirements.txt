@@ -7,3 +7,4 @@ django-tables2-reports
 django-bootstrap-form
 django-background-tasks
 pytz
+ufs-tools

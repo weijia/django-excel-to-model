@@ -1,7 +1,7 @@
 import os
 
-from libtool import get_folder
-from libtool.folder_tool import ensure_dir
+from ufs_tools import get_folder
+from ufs_tools.folder_tool import ensure_dir
 
 
 class DjangoAppGenerator(object):
