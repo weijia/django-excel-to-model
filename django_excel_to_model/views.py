@@ -2,11 +2,11 @@ import tempfile
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.views.decorators.csrf import csrf_exempt
+from ufs_tools.string_tools import class_name_to_low_case
 
 from django_excel_to_model.django_app_generator import DjangoAppGenerator
 from django_excel_to_model.management.commands.dump_excel_to_mapping import ModelCreator
 from forms import ExcelFormatTranslateForm
-from libtool.string_tools import class_name_to_low_case
 
 
 @csrf_exempt
