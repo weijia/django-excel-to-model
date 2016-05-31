@@ -11,7 +11,7 @@ import random
 
 class ModelCreator(object):
     reserved_keywords = ["type", ]
-    MAX_RECORD_LENGTH = 64000
+    MAX_RECORD_LENGTH = 64000/4  # for utf8 there will be multiple byte for one char
     MAX_FIELD_NAME_LENGTH = (64-5)
 
     def __init__(self, full_path, header_row_start_from_0=0, sheet_index_numbered_from_0=0, class_name="YourClass"):
