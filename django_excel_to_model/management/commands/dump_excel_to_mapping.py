@@ -113,7 +113,7 @@ class ModelCreator(object):
     def get_mapping_and_attr(self):
         res = [u"from django.db import models",
                u"from django.utils.translation import ugettext as _",
-               u"from django_excel_to_model.len_definitions import %s, TEXT_LENGTH_128" % self.field_len_definition,
+               u"from djangoautoconf.model_utils.len_definitions import %s, TEXT_LENGTH_128" % self.field_len_definition,
                u"",
                u""]
         res += self.mapping_code_lines + ["", ""]
