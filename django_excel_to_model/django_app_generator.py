@@ -1,6 +1,6 @@
 import os
 
-from ufs_tools import get_folder
+from ufs_tools.app_tools import get_executable
 from ufs_tools.folder_tool import ensure_dir
 
 
@@ -16,8 +16,8 @@ factory.register_all_model(models)
 '''
 
     def create_default_structure(self):
-        repo_root = os.path.abspath(os.path.join(get_folder(__file__), "../../../"))
-        target_repo_folder = os.path.join(repo_root, "auto-generated-apps")
+        repo_root = os.path.abspath(get_executable())
+        target_repo_folder = os.path.join(repo_root, "external_app_repos/auto-generated-apps")
         target_app_folder = os.path.join(target_repo_folder, self.app_name)
         ensure_dir(target_repo_folder)
         if os.path.exists(target_app_folder):
