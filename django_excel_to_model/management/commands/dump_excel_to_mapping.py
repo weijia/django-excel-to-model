@@ -38,7 +38,7 @@ class ModelCreator(object):
         mapping = None
         exec code
 
-        res = [u"", u"",
+        res = [u"", u"", u"# @python_2_unicode_compatible"
                u"class %s(models.Model):" % self.class_name]
         for row_data_dict in self.worksheet.enumerate(data_start_row):
             for key in attr_order:
@@ -53,6 +53,9 @@ class ModelCreator(object):
             break
         res.append(self.indents + u'data_import_id = models.CharField(max_length=TEXT_LENGTH_128, '
                                   u'help_text=_("Id for this import"), null=True, blank=True)')
+        res.append(self.indents + u'')
+        res.append(self.indents + u'# def __str__(self):')
+        res.append(self.indents + u'# ' + self.indents + u'return "%s" % self.name')
         self.model_code_lines = res
         return u"\n".join(res)
 
@@ -113,6 +116,7 @@ class ModelCreator(object):
     def get_mapping_and_attr(self):
         res = [u"from django.db import models",
                u"from django.utils.translation import ugettext as _",
+               u"from six import python_2_unicode_compatible",
                u"from djangoautoconf.model_utils.len_definitions import %s, TEXT_LENGTH_128" % self.field_len_definition,
                u"",
                u""]
