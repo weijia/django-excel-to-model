@@ -26,7 +26,7 @@ def get_string_with_only_char_in_list(col, char_list=var_name_char_list):
     return col
 
 
-def get_valid_field_name(col):
+def get_valid_excel_field_name(col):
     """
     This function will not return the exact string!!!!!!
     :param col:
@@ -35,7 +35,7 @@ def get_valid_field_name(col):
     if not (type(col) is unicode):
         raise "Non-unicode not supported"
     # Only ascii supported here
-    return get_string_with_only_char_in_list(col, var_name_char_list+ " \t")
+    return get_string_with_only_char_in_list(col, var_name_char_list + " \t")
     #
     # for ch in [u"'", u'"']:
     #     col = col.replace(ch, u"\\"+ch)

@@ -4,7 +4,7 @@ import pytz
 from xlrd import open_workbook, cellname, XL_CELL_DATE, xldate_as_tuple, XL_CELL_NUMBER
 from django.utils import timezone
 
-from field_tools import get_valid_field_name
+from field_tools import get_valid_excel_field_name
 
 
 class Excel(object):
@@ -48,7 +48,7 @@ class Sheet(object):
             try:
                 target_key = mapping[src_key]
             except KeyError:
-                target_key = mapping[get_valid_field_name(src_key)]
+                target_key = mapping[get_valid_excel_field_name(src_key)]
             cell = self.sheet.cell(row_index, col_index)
             res[target_key] = self.parse_cell_value(cell)
         return res
