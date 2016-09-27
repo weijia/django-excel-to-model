@@ -1,3 +1,4 @@
+from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import ugettext_lazy as _
 from django import forms
 from models import ExcelImportTask
@@ -16,8 +17,10 @@ class ExcelFormatTranslateForm(forms.Form):
 
 
 class ExcelImportTaskForm(ModelForm):
+    content = forms.ModelChoiceField(queryset=ContentType.objects.order_by('model'))
+
     class Meta:
         model = ExcelImportTask
         fields = ['excel_file', 'content', "header_row_numbered_from_1", "spreadsheet_numbered_from_1"]
-    is_import_now = forms.BooleanField(required=False)
 
+    is_import_now = forms.BooleanField(required=False)
