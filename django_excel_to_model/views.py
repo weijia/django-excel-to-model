@@ -1,4 +1,6 @@
 import tempfile
+
+from django.core.management import call_command
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.views.decorators.csrf import csrf_exempt
@@ -40,6 +42,9 @@ def create_mapping(request):
                 g = DjangoAppGenerator(app_name)
                 g.create_default_structure()
                 g.create_module_file("models.py", codes)
+
+                call_command('makemigrations')
+                call_command('migrate')
 
     context['form'] = form
     return render_to_response("excel_reader/excel_mapping_generator.html",

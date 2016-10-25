@@ -2,6 +2,8 @@
 {% load bootstrap %}
 
 {% block content %}
+
+    <a href="upload/">Upload</a>
     <form action="" method="post" enctype="multipart/form-data" class="form-inline">
         {% csrf_token %}
         <legend>Target file:</legend>
@@ -13,5 +15,4 @@
     </form>
     <pre lang="python">{{codes}}</pre>
 
-    <a href="upload/">Upload</a>
 {% endblock %}
