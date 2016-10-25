@@ -1,5 +1,6 @@
 import os
 import tempfile
+from sys import platform
 
 from django.core.management import call_command
 from django.shortcuts import render_to_response
@@ -44,9 +45,11 @@ def create_mapping(request):
                 g.create_default_structure()
                 g.create_module_file("models.py", codes)
 
-                os.system('python manage.py makemigrations')
-                os.system('python manage.py migrate')
-                os.system('touch manage.py')
+                if platform == "linux" or platform == "linux2":
+                    # linux
+                    os.system('python manage.py makemigrations')
+                    os.system('python manage.py migrate')
+                    os.system('touch manage.py')
 
     context['form'] = form
     return render_to_response("excel_reader/excel_mapping_generator.html",
