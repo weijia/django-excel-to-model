@@ -1,3 +1,4 @@
+import os
 import tempfile
 
 from django.core.management import call_command
@@ -43,8 +44,9 @@ def create_mapping(request):
                 g.create_default_structure()
                 g.create_module_file("models.py", codes)
 
-                call_command('makemigrations')
-                call_command('migrate')
+                os.system('python manage.py makemigrations')
+                os.system('python manage.py migrate')
+                os.system('touch manage.py')
 
     context['form'] = form
     return render_to_response("excel_reader/excel_mapping_generator.html",

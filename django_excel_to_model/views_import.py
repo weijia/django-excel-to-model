@@ -19,6 +19,8 @@ def upload_file(request):
             instance.next_process_line_numbered_from_1 = instance.header_row_numbered_from_1+1
             instance.save()
             if form.cleaned_data["is_import_now"]:
+                if form.cleaned_data["is_clean_before_import"]:
+                    instance.content.model_class().objects.all().delete()
                 e = ExcelFileFromClassImporter(instance.content.model_class(), instance.spreadsheet_numbered_from_1)
                 first_import_row_numbered_from_1 = instance.header_row_numbered_from_1+1
                 import_cnt = 999999999

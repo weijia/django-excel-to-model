@@ -2,8 +2,9 @@
 {% load bootstrap %}
 
 {% block content %}
-
+    <H1>Click the following to upload spreadsheet</H1>
     <a href="upload/">Upload</a>
+    <br/>
     <form action="" method="post" enctype="multipart/form-data" class="form-inline">
         {% csrf_token %}
         <legend>Target file:</legend>
