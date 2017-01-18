@@ -5,12 +5,11 @@ def get_target_field_name(col):
     # col = filter(lambda x: x in string.printable, col)
     col = get_string_with_only_char_in_list(col)
     col = col.replace("__", "_")
-    if col[-1] == "_":
-        col = col[0:-1]
-    if col[0] == "_":
-        col = col[1:]
+    col = col.strip("_")
     if col == "id":
         return "original_id"
+    if col == "global":
+        return "global_item"
     return col
 
 
