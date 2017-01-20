@@ -48,7 +48,7 @@ class ModelCreator(object):
 
                 first_part = u'%s%s = models.CharField(max_length=%s, help_text=_("""' % \
                              (self.indents, mapping[key], self.field_len_definition)
-                declaration = first_part + help_text + u'"""), null=True, blank=True)'
+                declaration = first_part + help_text + u'"""), null=True, blank=True, verbose_name="""'+help_text+'""")'
                 res.append(declaration)
             break
         res.append(self.indents + u'data_import_id = models.CharField(max_length=TEXT_LENGTH_128, '
