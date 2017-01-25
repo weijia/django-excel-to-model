@@ -9,6 +9,12 @@ import re
 import random
 
 
+def rename_if_field_name_starts_with_number(model_attribute_name):
+    if not (re.match("^[0-9].+", model_attribute_name) is None):
+        model_attribute_name = "n" + model_attribute_name
+    return model_attribute_name
+
+
 class ModelCreator(object):
     reserved_keywords = ["type", "class", "for", "in", "while"]
     MAX_RECORD_LENGTH = 64000/4  # for utf8 there will be multiple byte for one char
@@ -97,13 +103,7 @@ class ModelCreator(object):
         model_attribute_name = self.trim_if_field_name_too_long(model_attribute_name)
         model_attribute_name = model_attribute_name.strip("_")
         model_attribute_name = self.add_number_suffix_if_duplicated_field_name(model_attribute_name)
-        model_attribute_name = self.rename_if_field_name_starts_with_number(model_attribute_name)
-        return model_attribute_name
-
-    # noinspection PyMethodMayBeStatic
-    def rename_if_field_name_starts_with_number(self, model_attribute_name):
-        if not (re.match("^[0-9].+", model_attribute_name) is None):
-            model_attribute_name = "n" + model_attribute_name
+        model_attribute_name = rename_if_field_name_starts_with_number(model_attribute_name)
         return model_attribute_name
 
     def rename_if_field_name_is_keyword(self, model_attribute_name):
