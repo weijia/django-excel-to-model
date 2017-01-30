@@ -5,8 +5,9 @@ import django_tables2 as tables
 def get_django_tables2_from_dict(data_dict):
     c = ClassAttributeCreator()
     table_meta_class = type("Meta", (), {
-        "attrs": {'class': 'table table-striped table-bordered table-advance table-hover'}}
-                            )
+        "attrs": {'class': 'table table-striped table-bordered table-advance table-hover'},
+        "orderable": False,
+    })
     table_attributes = {"Meta": table_meta_class}
     table_data = {}
     for data_key in data_dict.keys():
