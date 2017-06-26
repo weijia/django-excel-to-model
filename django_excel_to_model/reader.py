@@ -62,6 +62,8 @@ class Sheet(object):
                 # Its format is General, so no additional fractional part should be displayed
                 if cell.value == float(int(cell.value)):
                     return int(cell.value)
+        elif cell.value == int(cell.value):
+            return int(cell.value)
         return cell.value
 
     def get_format_info(self, cell):
