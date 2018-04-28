@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 from datetime import datetime, tzinfo
 import pytz
+import pyxlsb
 from xlrd import open_workbook, cellname, XL_CELL_DATE, xldate_as_tuple, XL_CELL_NUMBER
 from django.utils import timezone
-
 from field_tools import get_valid_excel_field_name
 
 
@@ -21,8 +21,93 @@ class Excel(object):
         pass
 
 
-class Sheet(object):
+class BaseSheet(object):
+    def __init__(self, workbook, index):
+        self.workbook = workbook
+        self.sheet = None
+        self.title_columns = None
+
+    def format_number(self, cell):
+        print 'format number'
+
+    def parse_cell_value(self, cell):
+        print 'get cell value according to cell type'
+
+    def get_mapped_column(self, row_index, mapping):
+        print 'get mapped column'
+
+    def enumerate_mapped(self, mapping, start_row=1):
+        print 'enumerate mapped column'
+
+    def init_header_raw(self, header_row_index=0):
+        print 'init title column'
+
+    def get_columns(self, row_index):
+        print 'get column'
+
+
+class XlsbSheet(BaseSheet):
     def __init__(self, workbook, index=0):
+        self.workbook = workbook
+        self.sheet = workbook.get_sheet(index+1)
+        self.title_columns = None
+
+    def format_number(self, cell):
+        if cell.v == int(cell.v):
+            return int(cell.v)
+        return cell.v
+
+    def parse_cell_value(self, cell):
+        try:
+            final_value = int(cell.v)
+        except ValueError:
+            final_value = cell.v
+        return final_value
+
+    def get_mapped_columns(self, row_index, mapping):
+        res = {}
+        for row in self.sheet.rows(sparse=True):
+            for r in row:
+                if r.v is not None and r.r== row_index:
+                    src_key = unicode(self.title_columns[r.c])
+                    try:
+                        target_key = mapping[src_key]
+                    except KeyError:
+                        target_key = mapping[get_valid_excel_field_name(src_key)]
+                    cell = r
+                    res[target_key] = self.parse_cell_value(cell)
+        return res
+
+    def enumerate_mapped(self, mapping, start_row=1):
+        for row in self.sheet.rows(sparse=True):
+            res = {}
+            for r in row:
+                if r.v is not None and r.v not in self.title_columns:
+                    if r.r % 1000 == 0:
+                        print r, r.r
+                    src_key = unicode(self.title_columns[r.c])
+                    try:
+                        target_key = mapping[src_key]
+                    except KeyError:
+                        target_key = mapping[get_valid_excel_field_name(src_key)]
+                    res[target_key] = self.parse_cell_value(r)
+            yield res
+
+    def init_header_raw(self, header_row_index=0):
+        self.title_columns = self.get_columns(header_row_index)
+        return self.title_columns
+
+    def get_columns(self, row_index):
+        res = []
+        for row in self.sheet.rows(sparse=True):
+            for r in row:
+                if r.r == row_index and r.v is not None:
+                    res.append((str(r.v)))
+        return res
+
+
+class Sheet(BaseSheet):
+    def __init__(self, workbook, index = 0):
         self.workbook = workbook
         self.sheet = workbook.sheet_by_index(index)
         self.title_columns = None
@@ -90,7 +175,7 @@ class Sheet(object):
 
     def enumerate_mapped(self, mapping, start_row=1):
         for self.row_index in range(start_row, self.sheet.nrows):
-            sheet_columns = self.sheet.ncols
+            # sheet_columns = self.sheet.ncols
             if self.row_index % 1000 == 0:
                 print self.sheet.nrows, self.row_index
             yield self.get_mapped_columns(self.row_index, mapping)
@@ -131,12 +216,12 @@ class Sheet(object):
             res[src_key] = self.parse_cell_value(cell)
         return res
 
-    def get_header_raw(self, header_row_index=0):
+    def init_header_raw(self, header_row_index=0):
         self.title_columns = self.get_columns(header_row_index)
         return self.title_columns
 
     def get_headers(self):
-        self.get_header_raw()
+        self.init_header_raw()
         for column in self.title_columns:
             print column,
         print ""
@@ -153,15 +238,30 @@ class SheetConfig(object):
         return self.__has_header
 
 
-class ExcelFile(object):
-    def __init__(self, full_path, formatting_info=True):
-        self.workbook = open_workbook(full_path, formatting_info=formatting_info)
-        self.formatting_info = formatting_info
+class ExcelBaseFile(object):
+    def __init__(self, full_path):
+        raise "Failed to get open workbook"
+
+    def get_sheet(self, index):
+        raise "Failed to get sheet"
+
+
+class ExcelFile(ExcelBaseFile):
+    def __init__(self, full_path):
+        self.workbook = open_workbook(full_path)
 
     def get_sheet(self, index):
         s = Sheet(self.workbook, index)
         s.disable_formatting_info()
         return s
 
-    def unload_sheet(self, index):
-        self.workbook.unload_sheet(index)
+
+class XlsbFile(ExcelBaseFile):
+    def __init__(self, full_path):
+        self.workbook = pyxlsb.open_workbook(full_path)
+
+    def get_sheet(self, index):
+        sheet = XlsbSheet(self.workbook, index)
+        return sheet
+
+
