@@ -42,6 +42,12 @@ setup(
     url='https://github.com/weijia/django-excel-to-model',
     packages=[
         'django_excel_to_model',
+        'django_excel_to_model.management',
+        'django_excel_to_model.management.commands',
+        'django_excel_to_model.management.commands.model_create_utils',
+        'django_excel_to_model.migrations',
+        'django_excel_to_model.south_migrations',
+        'django_excel_to_model.templatetags',
     ],
     include_package_data=True,
     install_requires=[

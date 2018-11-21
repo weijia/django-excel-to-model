@@ -32,7 +32,7 @@ class ModelCreator(object):
         self.invalid_field_name = u"__invalid"
         self.attr_list_code_lines = []
         self.mapping_code_lines = []
-        excel_file = ExcelFile(full_path, False)
+        excel_file = ExcelFile(full_path)
         self.worksheet = excel_file.get_sheet(sheet_index_numbered_from_0)
         self.header = self.worksheet.get_header_raw(header_row_start_from_0)
         self.class_name = class_name
