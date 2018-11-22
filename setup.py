@@ -51,6 +51,9 @@ setup(
     ],
     include_package_data=True,
     install_requires=[
+        'django-background-tasks',
+        'pyxlsb',
+        'pinyin',
     ],
     license="BSD",
     zip_safe=False,
