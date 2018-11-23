@@ -3,7 +3,7 @@ import tempfile
 from sys import platform
 
 from django.core.management import call_command
-from django.shortcuts import render_to_response
+from django.shortcuts import render
 from django.template import RequestContext
 from django.views.decorators.csrf import csrf_exempt
 from ufs_tools.string_tools import class_name_to_low_case
@@ -33,7 +33,8 @@ def create_mapping(request):
             for chunk in import_file.chunks():
                 uploaded_file.write(chunk)
             uploaded_file.close()
-            m = ModelCreator(uploaded_file.name, header_row_numbered_from_1-1, spreadsheet_numbered_from_1-1, class_name)
+            m = ModelCreator(uploaded_file.name, header_row_numbered_from_1 - 1, spreadsheet_numbered_from_1 - 1,
+                             class_name)
             codes = m.create_mapping_for_excel()
             codes += "\n"  # Add an additional line to model file
             codes += m.create_model(data_start_row)
@@ -52,5 +53,5 @@ def create_mapping(request):
                     os.system('touch manage.py')
 
     context['form'] = form
-    return render_to_response("excel_reader/excel_mapping_generator.html",
-                              context, context_instance=RequestContext(request))
+    return render(request, "excel_reader/excel_mapping_generator.html",
+                  context)
