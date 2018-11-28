@@ -2,7 +2,6 @@ import pinyin
 
 
 def get_target_field_name(col):
-    col = pinyin.get(col, format="strip")
     for ch in [" ", ",", "_", ")", "(", ":", "/", "\\", '"', "'", "-", ",", ".", "<", ">", "%", "&", "\r", "\n"]:
         col = col.replace(ch, "_").replace("__", "_")
     # col = filter(lambda x: x in string.printable, col)
@@ -20,6 +19,7 @@ var_name_char_list = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUV
 
 
 def get_string_with_only_char_in_list(col, char_list=var_name_char_list):
+    col = pinyin.get(col, format="strip")
     res = u""
     for ch in col:
         if ch in char_list:
