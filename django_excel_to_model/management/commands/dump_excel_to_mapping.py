@@ -3,7 +3,7 @@ import os
 
 from django.core.management.base import BaseCommand, CommandError
 from django_excel_to_model.field_tools import get_valid_excel_field_name, get_target_field_name
-from django_excel_to_model.reader import ExcelFile
+from django_excel_to_model.reader import ExcelFile, XlsbFile
 from ufs_tools.folder_file_processor import FolderFileProcessor
 import re
 import random
@@ -32,9 +32,13 @@ class ModelCreator(object):
         self.invalid_field_name = u"__invalid"
         self.attr_list_code_lines = []
         self.mapping_code_lines = []
-        excel_file = ExcelFile(full_path)
+        try:
+            excel_file = ExcelFile(full_path)
+        except Exception:
+            excel_file = XlsbFile(full_path)
         self.worksheet = excel_file.get_sheet(sheet_index_numbered_from_0)
-        self.header = self.worksheet.get_header_raw(header_row_start_from_0)
+        # self.header = self.worksheet.get_header_raw(header_row_start_from_0)
+        self.header = self.worksheet.init_header_raw(header_row_start_from_0)
         self.class_name = class_name
         self.field_len_definition = 256
 
