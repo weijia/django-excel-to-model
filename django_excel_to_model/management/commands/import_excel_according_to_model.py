@@ -3,6 +3,9 @@ import importlib
 import os
 from django.contrib.contenttypes.models import ContentType
 from django.core.management.base import BaseCommand
+
+from django_excel_to_model.management.commands.utils.bulk_inserter import BulkInserter
+from django_excel_to_model.management.commands.utils.counter import Counter
 from django_excel_to_model.reader import ExcelFile, XlsbFile
 # from ufs_tools.inspect_utils import class_enumerator
 
@@ -23,6 +26,7 @@ class ExcelFileFromClassImporter(object):
         self.class_instance = class_instance
         self.translator = DictTranslator()
         self.sheet_numbered_from_1 = sheet_numbered_from_1
+        self.inserter = BulkInserter(self.class_instance)
 
     def import_excel(self, full_path, header_row_numbered_from_1, first_import_row_numbered_from_1=1, count=1000):
         if 'xlsb' in full_path:
@@ -34,20 +38,20 @@ class ExcelFileFromClassImporter(object):
         sheet.init_header_raw(header_row_numbered_from_1 - 1)
         # for class_instance in class_enumerator(self.model_module):
         #     new_item_class = class_instance
-        cnt = 0
+        c = Counter(count)
 
         for item_info_dict in sheet.enumerate_mapped(self.model_module.mapping,
                                                      start_row=first_import_row_numbered_from_1):
-            print item_info_dict
+            # print item_info_dict
             self.translator.translate(item_info_dict)
             item_info_dict["data_import_id"] = filename
-            target, is_created = self.class_instance.objects.get_or_create(**item_info_dict)
-            if not is_created:
-                print "item duplicated:", item_info_dict
-            cnt += 1
-            # If count = 1, when 1 processed, cnt will become 1
-            if cnt > count:
+            self.inserter.insert(item_info_dict)
+            # If count = 1, when 1 processed, cnt will become 0
+            c.decrease()
+            if c.is_equal_or_below(0):
+                self.inserter.commit()
                 return 0
+        self.inserter.commit()
         return -1
 
 
