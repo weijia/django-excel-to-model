@@ -6,8 +6,12 @@ from django.core.management.base import BaseCommand
 
 from django_excel_to_model.management.commands.utils.bulk_inserter import BulkInserter
 from django_excel_to_model.management.commands.utils.counter import Counter
+from django_excel_to_model.models import ExcelImportTask
 from django_excel_to_model.reader import ExcelFile, XlsbFile
-# from ufs_tools.inspect_utils import class_enumerator
+try:
+    from pinax.eventlog.models import log
+except:
+    log = None
 
 
 class DictTranslator(object):
@@ -49,10 +53,19 @@ class ExcelFileFromClassImporter(object):
             # If count = 1, when 1 processed, cnt will become 0
             c.decrease()
             if c.is_equal_or_below(0):
-                self.inserter.commit()
+                self.commit_and_log(filename)
                 return 0
-        self.inserter.commit()
+        self.commit_and_log(filename)
         return -1
+
+    def commit_and_log(self, filename):
+        self.inserter.commit()
+        if log is not None:
+            log(
+                user=None,
+                action=filename,
+                obj=ContentType.objects.get_for_model(ExcelImportTask)
+            )
 
 
 def import_excel_according_to_model(full_path, content_type_id, header_row_numbered_from_1,
