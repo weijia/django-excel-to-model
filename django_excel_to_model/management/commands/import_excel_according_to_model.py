@@ -64,6 +64,9 @@ class ExcelFileFromClassImporter(object):
             log(
                 user=None,
                 action=filename,
+                extra={
+                    "filename": filename
+                },
                 obj=ContentType.objects.get_for_model(ExcelImportTask)
             )
 
