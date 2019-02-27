@@ -50,17 +50,17 @@ class ModelCreator(object):
 
         res = [u"", u"", u"# @python_2_unicode_compatible",
                u"class %s(models.Model):" % self.class_name]
-        for row_data_dict in self.worksheet.enumerate(data_start_row):
-            for key in attr_order:
-                if key == "":
-                    continue
-                help_text = get_valid_excel_field_name(key)
 
-                first_part = u'%s%s = models.CharField(max_length=%s, help_text=_("""' % \
-                             (self.indents, mapping[key], self.field_len_definition)
-                declaration = first_part + help_text + u'"""), null=True, blank=True, verbose_name="""'+help_text+'""")'
-                res.append(declaration)
-            break
+        for key in attr_order:
+            if key == "":
+                continue
+            help_text = get_valid_excel_field_name(key)
+
+            first_part = u'%s%s = models.CharField(max_length=%s, help_text=_("""' % \
+                         (self.indents, mapping[key], self.field_len_definition)
+            declaration = first_part + help_text + u'"""), null=True, blank=True, verbose_name="""'+help_text+'""")'
+            res.append(declaration)
+
         res.append(self.indents + u'data_import_id = models.CharField(max_length=TEXT_LENGTH_128, '
                                   u'help_text=_("Id for this import"), null=True, blank=True)')
         res.append(self.indents + u'')
