@@ -31,7 +31,7 @@ class CsvFile(ExcelBaseFile):
         return header.split(';')
 
     def enumerate_mapped(self, mapping, start_row=1):
-        with codecs.open(self.full_path, "r", "utf_8_sig") as f:
+        with io.open(self.full_path, "r", encoding="utf_8_sig", newline='\r\n') as f:
             it = next(f)
             for line in f:
                 yield self.get_mapped_columns(line, mapping)
