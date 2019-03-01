@@ -1,0 +1,10 @@
+# django>=1.8.0
+xlrd
+django-filter
+# Additional requirements go here
+django-tables2
+django-tables2-reports
+django-bootstrap-form
+django-background-tasks
+pytz
+ufs-tools
