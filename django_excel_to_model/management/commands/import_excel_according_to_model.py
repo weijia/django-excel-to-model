@@ -4,10 +4,11 @@ import os
 from django.contrib.contenttypes.models import ContentType
 from django.core.management.base import BaseCommand
 
+from django_excel_to_model.file_readers.csv_reader import CsvFile
 from django_excel_to_model.management.commands.utils.bulk_inserter import BulkInserter
 from django_excel_to_model.management.commands.utils.counter import Counter
 from django_excel_to_model.models import ExcelImportTask
-from django_excel_to_model.reader import ExcelFile, XlsbFile, CsvFile
+from django_excel_to_model.reader import ExcelFile, XlsbFile
 try:
     from pinax.eventlog.models import log
 except:

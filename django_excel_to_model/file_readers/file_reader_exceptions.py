@@ -1,0 +1,4 @@
+
+
+class NonUnicodeFieldNameNotSupported(Exception):
+    pass

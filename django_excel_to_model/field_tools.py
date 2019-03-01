@@ -1,5 +1,7 @@
 import pinyin
 
+from django_excel_to_model.file_readers.file_reader_exceptions import NonUnicodeFieldNameNotSupported
+
 
 def get_target_field_name(col):
     for ch in [" ", ",", "_", ")", "(", ":", "/", "\\", '"', "'", "-", ",", ".", "<", ">", "%", "&", "\r", "\n"]:
@@ -35,17 +37,7 @@ def get_valid_excel_field_name(col):
     :return:
     """
     if not (type(col) is unicode):
-        raise "Non-unicode not supported"
+        raise NonUnicodeFieldNameNotSupported
     # Only ascii supported here
     return get_string_with_only_char_in_list(col, var_name_char_list + " \t")
-    #
-    # for ch in [u"'", u'"']:
-    #     col = col.replace(ch, u"\\"+ch)
-    #
-    # # col = col.encode("utf8", errors="ignore")
-    # # col = col.decode("utf8")
-    # # for ch in [u"\r", u"\n"]:
-    # #     col = col.replace(ch, "")
-    # # col = col.replace(u"\xa0\xa0", "")
-    # # col = unicode(col.encode("ascii", errors="ignore"))
-    # return col
+
