@@ -2,9 +2,18 @@
 from datetime import datetime, tzinfo
 import pytz
 import pyxlsb
+import codecs
 from xlrd import open_workbook, cellname, XL_CELL_DATE, xldate_as_tuple, XL_CELL_NUMBER
 from django.utils import timezone
 from field_tools import get_valid_excel_field_name
+
+
+class ExcelReaderBaseException(Exception):
+    pass
+
+
+class InconsistentLineLength(ExcelReaderBaseException):
+    pass
 
 
 class Excel(object):
@@ -265,3 +274,47 @@ class XlsbFile(ExcelBaseFile):
         return sheet
 
 
+class CsvFile(ExcelBaseFile):
+    def __init__(self, full_path):
+        self.full_path = full_path
+
+    def get_sheet(self, index):
+        self.sheet_index = index
+        return self
+
+    def init_header_raw(self, header_index):
+        self.title_columns = self.get_title_columns(header_index)
+        assert self.title_columns is not None
+        self.title_column_len = len(self.title_columns)
+
+    def get_title_columns(self, header_index):
+        header = None
+        with codecs.open(self.full_path, "r", "utf_8_sig") as f:
+            for idx, line in enumerate(f):
+                if idx == header_index:
+                    header = line
+                    break
+        return header.split(';')
+
+    def enumerate_mapped(self, mapping, start_row=1):
+        with codecs.open(self.full_path, "r", "utf_8_sig") as f:
+            it = next(f)
+            for line in f:
+                yield self.get_mapped_columns(line, mapping)
+
+    def get_mapped_columns(self, line, mapping):
+
+        value_list = line.split(';')
+        if len(self.title_columns) != len(value_list):
+            raise InconsistentLineLength('Line length is not consistent with header: %s' % line)
+
+        res = {}
+        for i in range(self.title_column_len):
+            src_key = unicode(self.title_columns[i])
+            try:
+                mapping_key = mapping[src_key]
+            except KeyError:
+                mapping_key = mapping[get_valid_excel_field_name(src_key)]
+            val = value_list[i]
+            res[mapping_key] = val
+        return res

@@ -7,7 +7,7 @@ from django.core.management.base import BaseCommand
 from django_excel_to_model.management.commands.utils.bulk_inserter import BulkInserter
 from django_excel_to_model.management.commands.utils.counter import Counter
 from django_excel_to_model.models import ExcelImportTask
-from django_excel_to_model.reader import ExcelFile, XlsbFile
+from django_excel_to_model.reader import ExcelFile, XlsbFile, CsvFile
 try:
     from pinax.eventlog.models import log
 except:
@@ -37,6 +37,8 @@ class ExcelFileFromClassImporter(object):
             excel_file = XlsbFile(full_path)
         elif 'xlsx' in full_path:
             excel_file = ExcelFile(full_path)
+        else:
+            excel_file = CsvFile(full_path)
         filename = os.path.basename(full_path)
         sheet = excel_file.get_sheet(self.sheet_numbered_from_1-1)
         sheet.init_header_raw(header_row_numbered_from_1 - 1)
