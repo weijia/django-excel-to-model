@@ -2,10 +2,16 @@ import pinyin
 
 from django_excel_to_model.file_readers.file_reader_exceptions import NonUnicodeFieldNameNotSupported
 
+SPECIFIC_CHAR_MAPPING = {
+    "%" : 'percentage'
+}
 
 def get_target_field_name(col):
     for ch in [" ", ",", "_", ")", "(", ":", "/", "\\", '"', "'", "-", ",", ".", "<", ">", "%", "&", "\r", "\n"]:
-        col = col.replace(ch, "_").replace("__", "_")
+        if ch in SPECIFIC_CHAR_MAPPING:
+            col = col.replace(ch, SPECIFIC_CHAR_MAPPING[ch])
+        else:
+            col = col.replace(ch, "_").replace("__", "_")
     # col = filter(lambda x: x in string.printable, col)
     col = get_string_with_only_char_in_list(col)
     col = col.replace("__", "_")
