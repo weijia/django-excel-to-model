@@ -41,3 +41,10 @@ def get_valid_excel_field_name(col):
     # Only ascii supported here
     return get_string_with_only_char_in_list(col, var_name_char_list + " \t")
 
+
+def get_db_field(mapping, src_key):
+    try:
+        target_key = mapping[src_key]
+    except KeyError:
+        target_key = mapping[get_valid_excel_field_name(src_key)]
+    return target_key

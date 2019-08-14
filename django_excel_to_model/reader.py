@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
-from datetime import datetime, tzinfo
+from datetime import datetime
 import pytz
 import pyxlsb
-import codecs
-from xlrd import open_workbook, cellname, XL_CELL_DATE, xldate_as_tuple, XL_CELL_NUMBER
+from xlrd import open_workbook, XL_CELL_DATE, xldate_as_tuple, XL_CELL_NUMBER
 from django.utils import timezone
-from field_tools import get_valid_excel_field_name
+from django_excel_to_model.field_tools import get_db_field
 
 
 class ExcelReaderBaseException(Exception):
@@ -79,10 +78,7 @@ class XlsbSheet(BaseSheet):
             for r in row:
                 if r.v is not None and r.r== row_index:
                     src_key = unicode(self.title_columns[r.c])
-                    try:
-                        target_key = mapping[src_key]
-                    except KeyError:
-                        target_key = mapping[get_valid_excel_field_name(src_key)]
+                    target_key = get_db_field(mapping, src_key)
                     cell = r
                     res[target_key] = self.parse_cell_value(cell)
         return res
@@ -95,10 +91,7 @@ class XlsbSheet(BaseSheet):
                     if r.r % 1000 == 0:
                         print r, r.r
                     src_key = unicode(self.title_columns[r.c])
-                    try:
-                        target_key = mapping[src_key]
-                    except KeyError:
-                        target_key = mapping[get_valid_excel_field_name(src_key)]
+                    target_key = get_db_field(mapping, src_key)
                     res[target_key] = self.parse_cell_value(r)
             yield res
 
@@ -139,10 +132,7 @@ class Sheet(BaseSheet):
             # print self.sheet.cell(row_index, col_index).value
             src_key = unicode(self.title_columns[col_index])
             # print "___________________", src_key
-            try:
-                target_key = mapping[src_key]
-            except KeyError:
-                target_key = mapping[get_valid_excel_field_name(src_key)]
+            target_key = get_db_field(mapping, src_key)
             cell = self.sheet.cell(row_index, col_index)
             res[target_key] = self.parse_cell_value(cell)
         return res
@@ -226,7 +216,8 @@ class Sheet(BaseSheet):
         return res
 
     def init_header_raw(self, header_row_index=0):
-        self.title_columns = self.get_columns(header_row_index)
+        if self.title_columns is None:
+            self.title_columns = self.get_columns(header_row_index)
         return self.title_columns
 
     def get_headers(self):

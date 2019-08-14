@@ -4,15 +4,21 @@ import os
 from django.contrib.contenttypes.models import ContentType
 from django.core.management.base import BaseCommand
 
+from django_excel_to_model.field_tools import get_valid_excel_field_name
 from django_excel_to_model.file_readers.csv_reader import CsvFile
 from django_excel_to_model.management.commands.utils.bulk_inserter import BulkInserter
 from django_excel_to_model.management.commands.utils.counter import Counter
 from django_excel_to_model.models import ExcelImportTask
 from django_excel_to_model.reader import ExcelFile, XlsbFile
+
 try:
     from pinax.eventlog.models import log
-except:
+except ImportError:
     log = None
+
+
+class MandatoryColumnMissing(Exception):
+    pass
 
 
 class DictTranslator(object):
@@ -32,6 +38,7 @@ class ExcelFileFromClassImporter(object):
         self.translator = DictTranslator()
         self.sheet_numbered_from_1 = sheet_numbered_from_1
         self.inserter = BulkInserter(self.class_instance)
+        self.mandatory_column_headers = None
 
     def import_excel(self, full_path, header_row_numbered_from_1, first_import_row_numbered_from_1=1, count=1000):
         if 'xlsb' in full_path:
@@ -41,13 +48,24 @@ class ExcelFileFromClassImporter(object):
         else:
             excel_file = CsvFile(full_path)
         filename = os.path.basename(full_path)
-        sheet = excel_file.get_sheet(self.sheet_numbered_from_1-1)
+        sheet = excel_file.get_sheet(self.sheet_numbered_from_1 - 1)
         sheet.init_header_raw(header_row_numbered_from_1 - 1)
         # for class_instance in class_enumerator(self.model_module):
         #     new_item_class = class_instance
         c = Counter(count)
 
-        for item_info_dict in sheet.enumerate_mapped(self.model_module.mapping,
+        self.validate_existence_of_mandatory_columns(sheet)
+
+        column_to_db_field_mapping = {}
+
+        for column_name in sheet.get_title_columns():
+            if column_name in self.model_module.mapping:
+                column_to_db_field_mapping[column_name] = self.model_module.mapping[column_name]
+            elif get_valid_excel_field_name(column_name) in self.model_module.mapping:
+                column_to_db_field_mapping[column_name] = \
+                    self.model_module.mapping[get_valid_excel_field_name(column_name)]
+
+        for item_info_dict in sheet.enumerate_mapped(column_to_db_field_mapping,
                                                      start_row=first_import_row_numbered_from_1):
             # print item_info_dict
             self.translator.translate(item_info_dict)
@@ -60,6 +78,12 @@ class ExcelFileFromClassImporter(object):
                 return 0
         self.commit_and_log(filename)
         return -1
+
+    def validate_existence_of_mandatory_columns(self, sheet):
+        if self.mandatory_column_headers is not None:
+            if all(spreadsheet_column_header in sheet.get_title_columns()
+                   for spreadsheet_column_header in self.mandatory_column_headers):
+                raise MandatoryColumnMissing()
 
     def commit_and_log(self, filename):
         self.inserter.commit()
