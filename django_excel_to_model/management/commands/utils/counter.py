@@ -10,7 +10,7 @@ class Counter(object):
 
     def decrease(self):
         self.cnt -= 1
-        if not self.cnt % self.notification_interval == 0:
+        if (self.init-self.cnt) % self.notification_interval == 0:
             print("Current: %d/%d" % (self.init-self.cnt, self.init))
 
     def is_equal_or_below(self, value):
