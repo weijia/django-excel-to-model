@@ -130,10 +130,12 @@ class Sheet(BaseSheet):
             # print self.sheet.cell(row_index, col_index).value
             src_key = unicode(self.title_columns[col_index])
             # print "___________________", src_key
-            try:
+            if src_key in mapping:
                 target_key = mapping[src_key]
-            except KeyError:
+            elif get_valid_excel_field_name(src_key) in mapping:
                 target_key = mapping[get_valid_excel_field_name(src_key)]
+            else:
+                continue
             cell = self.sheet.cell(row_index, col_index)
             res[target_key] = self.parse_cell_value(cell)
         return res
