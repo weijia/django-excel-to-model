@@ -42,6 +42,12 @@ class BaseSheet(object):
         print 'get cell value according to cell type'
 
     def get_mapped_column(self, row_index, mapping):
+        """
+        Return row (identified in row_index) data as a dict in format: {"mapped_column_name": "column_value", ...}
+        :param row_index:
+        :param mapping:
+        :return:
+        """
         print 'get mapped column'
 
     def enumerate_mapped(self, mapping, start_row=1):
@@ -73,26 +79,20 @@ class XlsbSheet(BaseSheet):
         return final_value
 
     def get_mapped_columns(self, row_index, mapping):
-        res = {}
-        for row in self.sheet.rows(sparse=True):
-            for r in row:
-                if r.v is not None and r.r== row_index:
-                    src_key = unicode(self.title_columns[r.c])
-                    target_key = get_db_field(mapping, src_key)
-                    cell = r
-                    res[target_key] = self.parse_cell_value(cell)
-        return res
+        for mapped_data in self.enumerate_mapped(mapping, row_index):
+            return mapped_data
 
     def enumerate_mapped(self, mapping, start_row=1):
         for row in self.sheet.rows(sparse=True):
             res = {}
-            for r in row:
-                if r.v is not None and r.v not in self.title_columns:
-                    if r.r % 1000 == 0:
-                        print r, r.r
-                    src_key = unicode(self.title_columns[r.c])
+            for cell in row:
+                if cell.v is not None and cell.r < start_row:
+                    break
+                if cell.v is not None and cell.v not in self.title_columns:
+                    src_key = unicode(self.title_columns[cell.c])
                     target_key = get_db_field(mapping, src_key)
-                    res[target_key] = self.parse_cell_value(r)
+                    if target_key:
+                        res[target_key] = self.parse_cell_value(cell)
             yield res
 
     def init_header_raw(self, header_row_index=0):
@@ -133,8 +133,9 @@ class Sheet(BaseSheet):
             src_key = unicode(self.title_columns[col_index])
             # print "___________________", src_key
             target_key = get_db_field(mapping, src_key)
-            cell = self.sheet.cell(row_index, col_index)
-            res[target_key] = self.parse_cell_value(cell)
+            if target_key:
+                cell = self.sheet.cell(row_index, col_index)
+                res[target_key] = self.parse_cell_value(cell)
         return res
 
     def format_number(self, cell):

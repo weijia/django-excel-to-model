@@ -49,8 +49,10 @@ def get_valid_excel_field_name(col):
 
 
 def get_db_field(mapping, src_key):
-    try:
+    if src_key in mapping:
         target_key = mapping[src_key]
-    except KeyError:
+    elif get_valid_excel_field_name(src_key) in mapping:
         target_key = mapping[get_valid_excel_field_name(src_key)]
+    else:
+        target_key = None
     return target_key
