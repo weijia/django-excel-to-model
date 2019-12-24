@@ -17,7 +17,7 @@ factory.register_all_model(models)
 '''
         self.urls_content = '''from djangoautoconf.model_utils.url_for_models import add_all_urls
 from django.conf.urls import patterns
-import models
+from . import models
 
 urlpatterns = patterns('',)
 

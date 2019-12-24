@@ -1,9 +1,17 @@
 import pinyin
 
+from django_excel_to_model.file_readers.file_reader_exceptions import NonUnicodeFieldNameNotSupported
+
+SPECIFIC_CHAR_MAPPING = {
+    "%" : 'percentage'
+}
 
 def get_target_field_name(col):
     for ch in [" ", ",", "_", ")", "(", ":", "/", "\\", '"', "'", "-", ",", ".", "<", ">", "%", "&", "\r", "\n"]:
-        col = col.replace(ch, "_").replace("__", "_")
+        if ch in SPECIFIC_CHAR_MAPPING:
+            col = col.replace(ch, SPECIFIC_CHAR_MAPPING[ch])
+        else:
+            col = col.replace(ch, "_").replace("__", "_")
     # col = filter(lambda x: x in string.printable, col)
     col = get_string_with_only_char_in_list(col)
     col = col.replace("__", "_")
@@ -35,17 +43,14 @@ def get_valid_excel_field_name(col):
     :return:
     """
     if not (type(col) is unicode):
-        raise "Non-unicode not supported"
+        raise NonUnicodeFieldNameNotSupported
     # Only ascii supported here
     return get_string_with_only_char_in_list(col, var_name_char_list + " \t")
-    #
-    # for ch in [u"'", u'"']:
-    #     col = col.replace(ch, u"\\"+ch)
-    #
-    # # col = col.encode("utf8", errors="ignore")
-    # # col = col.decode("utf8")
-    # # for ch in [u"\r", u"\n"]:
-    # #     col = col.replace(ch, "")
-    # # col = col.replace(u"\xa0\xa0", "")
-    # # col = unicode(col.encode("ascii", errors="ignore"))
-    # return col
+
+
+def get_db_field(mapping, src_key):
+    try:
+        target_key = mapping[src_key]
+    except KeyError:
+        target_key = mapping[get_valid_excel_field_name(src_key)]
+    return target_key
