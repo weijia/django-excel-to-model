@@ -19,7 +19,7 @@ class DataSourceFactory(object):
         :param header_row_start_from_0:
         :return: DataSourceBase object
         """
-        for excel_file_reader in [#self.get_xlrd_file,
+        for excel_file_reader in [self.get_xlrd_file,
                                   self.get_openpyxl_file, self.get_xlsb_file]:
             excel_file = excel_file_reader()
             if excel_file:
