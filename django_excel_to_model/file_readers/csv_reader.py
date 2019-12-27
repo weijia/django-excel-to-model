@@ -1,8 +1,7 @@
-import codecs
 import io
 
 from django_excel_to_model.field_tools import get_valid_excel_field_name
-from django_excel_to_model.reader import ExcelBaseFile, InconsistentLineLength
+from django_excel_to_model.reader import ExcelBaseFile
 
 
 class CsvFile(ExcelBaseFile):
@@ -16,19 +15,16 @@ class CsvFile(ExcelBaseFile):
         self.sheet_index = index
         return self
 
-    def init_header_raw(self, header_index):
-        self.title_columns = self.get_title_columns(header_index)
-        assert self.title_columns is not None
-        self.title_column_len = len(self.title_columns)
-
-    def get_title_columns(self, header_index):
+    def get_headers(self, header_index=0):
         header = None
         with io.open(self.full_path, "r", encoding="utf_8_sig", newline='\r\n') as f:
             for idx, line in enumerate(f):
                 if idx == header_index:
                     header = line
                     break
-        return header.split(';')
+        self.title_columns = header.split(';')
+        assert self.title_columns is not None
+        self.title_column_len = len(self.title_columns)
 
     def enumerate_mapped(self, mapping, start_row=1):
         with io.open(self.full_path, "r", encoding="utf_8_sig", newline='\r\n') as f:
@@ -40,7 +36,7 @@ class CsvFile(ExcelBaseFile):
 
         value_list = line.split(';')
         if len(self.title_columns) != len(value_list):
-            raise InconsistentLineLength('Line length is not consistent with header: %s' % line)
+            raise Exception('Line length is not consistent with header: %s' % line)
 
         res = {}
         for i in range(self.title_column_len):

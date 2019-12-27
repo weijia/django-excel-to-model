@@ -6,7 +6,7 @@ class BulkInserter(object):
         super(BulkInserter, self).__init__()
         self.max_insert_number = max_insert_number
         self.model = model
-        self.count = Counter(max_insert_number)
+        self.count = Counter(max_insert_number, notification_interval=None)
         self.obj_list = []
 
     def insert(self, obj_dict):

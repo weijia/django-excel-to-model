@@ -3,6 +3,7 @@ import os
 
 from django.core.management.base import BaseCommand, CommandError
 from django_excel_to_model.field_tools import get_valid_excel_field_name, get_target_field_name
+from django_excel_to_model.file_readers.data_source_factory import DataSourceFactory
 from django_excel_to_model.reader import ExcelFile, XlsbFile
 from ufs_tools.folder_file_processor import FolderFileProcessor
 import re
@@ -32,13 +33,9 @@ class ModelCreator(object):
         self.invalid_field_name = u"__invalid"
         self.attr_list_code_lines = []
         self.mapping_code_lines = []
-        try:
-            excel_file = ExcelFile(full_path)
-        except Exception:
-            excel_file = XlsbFile(full_path)
-        self.worksheet = excel_file.get_sheet(sheet_index_numbered_from_0)
-        # self.header = self.worksheet.get_header_raw(header_row_start_from_0)
-        self.header = self.worksheet.init_header_raw(header_row_start_from_0)
+        self.worksheet = DataSourceFactory(full_path).get_data_source(
+            sheet_index_numbered_from_0, header_row_start_from_0)
+        self.header = self.worksheet.get_headers()
         self.class_name = class_name
         self.field_len_definition = 256
 
@@ -72,7 +69,7 @@ class ModelCreator(object):
     def get_default_field_len_definition(self):
         max_len_for_each_field = int(self.MAX_RECORD_LENGTH / self.field_num)
         if max_len_for_each_field == 0:
-            raise "Too many fields"
+            raise Exception("Too many fields")
         max_target_len = 1024
         while (max_target_len & max_len_for_each_field) == 0:
             max_target_len >>= 1

@@ -6,6 +6,7 @@ from django.core.management.base import BaseCommand
 
 from django_excel_to_model.field_tools import get_valid_excel_field_name
 from django_excel_to_model.file_readers.csv_reader import CsvFile
+from django_excel_to_model.file_readers.data_source_factory import DataSourceFactory
 from django_excel_to_model.management.commands.utils.bulk_inserter import BulkInserter
 from django_excel_to_model.management.commands.utils.counter import Counter
 from django_excel_to_model.models import ExcelImportTask
@@ -40,33 +41,27 @@ class ExcelFileFromClassImporter(object):
         self.inserter = BulkInserter(self.class_instance)
         self.mandatory_column_headers = None
 
-    def import_excel(self, full_path, header_row_numbered_from_1, first_import_row_numbered_from_1=1, count=1000):
-        if 'xlsb' in full_path:
-            excel_file = XlsbFile(full_path)
-        elif 'xlsx' in full_path:
-            excel_file = ExcelFile(full_path)
-        else:
-            excel_file = CsvFile(full_path)
+    def import_excel(self, full_path, header_row_numbered_from_1=1, first_import_row_numbered_from_1=2, count=1000):
         filename = os.path.basename(full_path)
-        sheet = excel_file.get_sheet(self.sheet_numbered_from_1 - 1)
-        sheet.init_header_raw(header_row_numbered_from_1 - 1)
-        # for class_instance in class_enumerator(self.model_module):
-        #     new_item_class = class_instance
+        data_source = DataSourceFactory(full_path).get_data_source(
+            sheet_index_numbered_from_0=self.sheet_numbered_from_1 - 1,
+            header_row_start_from_0=header_row_numbered_from_1 - 1)
+        count = min(data_source.get_total_rows(), count)
         c = Counter(count)
 
-        self.validate_existence_of_mandatory_columns(sheet)
+        self.validate_existence_of_mandatory_columns(data_source)
 
         column_to_db_field_mapping = {}
 
-        for column_name in sheet.get_title_columns():
+        for column_name in data_source.get_headers():
             if column_name in self.model_module.mapping:
                 column_to_db_field_mapping[column_name] = self.model_module.mapping[column_name]
             elif get_valid_excel_field_name(column_name) in self.model_module.mapping:
                 column_to_db_field_mapping[column_name] = \
                     self.model_module.mapping[get_valid_excel_field_name(column_name)]
 
-        for item_info_dict in sheet.enumerate_mapped(column_to_db_field_mapping,
-                                                     start_row=first_import_row_numbered_from_1):
+        for item_info_dict in data_source.enumerate_mapped(column_to_db_field_mapping,
+                                                           start_row_numbered_from_0=first_import_row_numbered_from_1-1):
             # print item_info_dict
             self.translator.translate(item_info_dict)
             item_info_dict["data_import_id"] = filename
@@ -81,7 +76,7 @@ class ExcelFileFromClassImporter(object):
 
     def validate_existence_of_mandatory_columns(self, sheet):
         if self.mandatory_column_headers is not None:
-            if all(spreadsheet_column_header in sheet.get_title_columns()
+            if all(spreadsheet_column_header in sheet.get_headers()
                    for spreadsheet_column_header in self.mandatory_column_headers):
                 raise MandatoryColumnMissing()
 

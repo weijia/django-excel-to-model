@@ -6,11 +6,12 @@ class Counter(object):
         self.cnt = init
         self.init = init
         self.notification_interval = notification_interval
-        print("Start counting: %d/%d" % (self.init-self.cnt, self.init))
+        if self.notification_interval:
+            print("Start counting: %d/%d" % (self.init-self.cnt, self.init))
 
     def decrease(self):
         self.cnt -= 1
-        if (self.init-self.cnt) % self.notification_interval == 0:
+        if self.notification_interval and ((self.init-self.cnt) % self.notification_interval == 0):
             print("Current: %d/%d" % (self.init-self.cnt, self.init))
 
     def is_equal_or_below(self, value):

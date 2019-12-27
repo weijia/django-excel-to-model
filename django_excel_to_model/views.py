@@ -26,10 +26,13 @@ def create_mapping(request):
         spreadsheet_numbered_from_1 = form.cleaned_data['spreadsheet_numbered_from_1']
         class_name = form.cleaned_data['class_name']
         app_name = class_name_to_low_case(class_name).replace("_", "-")
-
+        filename_parts = import_file.name.split(".")
+        suffix = ""
+        if len(filename_parts) > 1:
+            suffix = ".%s"%filename_parts[1]
         # first always write the uploaded file to disk as it may be a
         # memory file or else based on settings upload handlers
-        with tempfile.NamedTemporaryFile(delete=False) as uploaded_file:
+        with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as uploaded_file:
             for chunk in import_file.chunks():
                 uploaded_file.write(chunk)
             uploaded_file.close()
