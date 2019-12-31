@@ -51,17 +51,10 @@ class ExcelFileFromClassImporter(object):
 
         self.validate_existence_of_mandatory_columns(data_source)
 
-        column_to_db_field_mapping = {}
-
-        for column_name in data_source.get_headers():
-            if column_name in self.model_module.mapping:
-                column_to_db_field_mapping[column_name] = self.model_module.mapping[column_name]
-            elif get_valid_excel_field_name(column_name) in self.model_module.mapping:
-                column_to_db_field_mapping[column_name] = \
-                    self.model_module.mapping[get_valid_excel_field_name(column_name)]
+        column_to_db_field_mapping = self._get_column_to_db_field_mapping(data_source)
 
         for item_info_dict in data_source.enumerate_mapped(column_to_db_field_mapping,
-                                                           start_row_numbered_from_0=first_import_row_numbered_from_1-1):
+                                                           start_row_numbered_from_0=first_import_row_numbered_from_1 - 1):
             # print item_info_dict
             self.translator.translate(item_info_dict)
             item_info_dict["data_import_id"] = filename
@@ -74,10 +67,22 @@ class ExcelFileFromClassImporter(object):
         self.commit_and_log(filename)
         return -1
 
+    def _get_column_to_db_field_mapping(self, data_source):
+        column_to_db_field_mapping = {}
+        for column_name in data_source.get_headers():
+            if column_name in self.model_module.mapping:
+                column_to_db_field_mapping[column_name] = self.model_module.mapping[column_name]
+            else:
+                converted_field_name = get_valid_excel_field_name(column_name)
+                if converted_field_name in self.model_module.mapping:
+                    column_to_db_field_mapping[column_name] = \
+                        self.model_module.mapping[converted_field_name]
+        return column_to_db_field_mapping
+
     def validate_existence_of_mandatory_columns(self, sheet):
         if self.mandatory_column_headers is not None:
-            if all(spreadsheet_column_header in sheet.get_headers()
-                   for spreadsheet_column_header in self.mandatory_column_headers):
+            if not all(spreadsheet_column_header in sheet.get_headers()
+                       for spreadsheet_column_header in self.mandatory_column_headers):
                 raise MandatoryColumnMissing()
 
     def commit_and_log(self, filename):
