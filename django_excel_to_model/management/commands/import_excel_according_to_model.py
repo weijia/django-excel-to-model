@@ -40,6 +40,10 @@ class ExcelFileFromClassImporter(object):
         self.sheet_numbered_from_1 = sheet_numbered_from_1
         self.inserter = BulkInserter(self.class_instance)
         self.mandatory_column_headers = None
+        self.is_clean_before_import = False
+
+    def set_clean_before_import(self):
+        self.is_clean_before_import = True
 
     def import_excel(self, full_path, header_row_numbered_from_1=1, first_import_row_numbered_from_1=2, count=1000):
         filename = os.path.basename(full_path)
@@ -50,6 +54,9 @@ class ExcelFileFromClassImporter(object):
         c = Counter(count)
 
         self.validate_existence_of_mandatory_columns(data_source)
+
+        if self.is_clean_before_import:
+            self.class_instance.objects.all().delete()
 
         column_to_db_field_mapping = self._get_column_to_db_field_mapping(data_source)
 
