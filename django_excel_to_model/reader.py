@@ -78,7 +78,7 @@ class Sheet(RowRandomlyAccessibleSheet):
         return row_data
 
     def enumerate(self, start_row_numbered_from_0=1):
-        for row_index_numbered_from_0 in xrange(start_row_numbered_from_0, self.get_total_rows()):
+        for row_index_numbered_from_0 in range(start_row_numbered_from_0, self.get_total_rows()):
             yield self.get_row(row_index_numbered_from_0)
 
     def get_total_columns(self):
