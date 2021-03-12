@@ -42,8 +42,8 @@ def get_valid_excel_field_name(col):
     :param col:
     :return:
     """
-    if not (type(col) is unicode):
-        raise NonUnicodeFieldNameNotSupported
+    #if not (type(col) is unicode):
+    #    raise NonUnicodeFieldNameNotSupported
     # Only ascii supported here
     return get_string_with_only_char_in_list(col, var_name_char_list + " \t")
 
