@@ -73,7 +73,7 @@ class Sheet(RowRandomlyAccessibleSheet):
         :return:
         """
         row_data = []
-        for col_index in xrange(self.get_total_columns()):
+        for col_index in range(self.get_total_columns()):
             row_data.append(self.parse_cell_value(self.sheet.cell(row_index_start_from_0, col_index)))
         return row_data
 
