@@ -148,10 +148,10 @@ class Command(BaseCommand):
             'count', nargs="?", help='process line count', default=[1000], type=int)
 
         arg_result = parser.parse_args()
-        print vars(arg_result)["file-path"][0]
-        print vars(arg_result)["content-type-id"][0]
-        print vars(arg_result)["start"][0]
-        print vars(arg_result)["count"]
+        print(vars(arg_result)["file-path"][0])
+        print(vars(arg_result)["content-type-id"][0])
+        print(vars(arg_result)["start"][0])
+        print(vars(arg_result)["count"])
 
         file_path = vars(arg_result)["file-path"][0]
         content_type_id = vars(arg_result)["content-type-id"][0]
