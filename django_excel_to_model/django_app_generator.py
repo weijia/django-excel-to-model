@@ -10,7 +10,7 @@ class DjangoAppGenerator(object):
         self.app_name = app_name
         self.app_module_name = app_name.replace("-", "_")
         self.module_path = None
-        self.admin_file_content = '''import models
+        self.admin_file_content = '''from . import models
 from djangoautoconf.auto_conf_admin_tools.admin_register import AdminRegister
 factory = AdminRegister()
 factory.register_all_model(models)
