@@ -47,3 +47,7 @@ class XlsbSheet(BaseSheet):
                 if r.r == row_index and r.v is not None:
                     res.append((str(r.v)))
         return res
+
+    def get_total_rows(self):
+        return len(self.sheet.rows)
+
