@@ -20,7 +20,7 @@ class Migration(migrations.Migration):
                 ('next_process_line_numbered_from_1', models.IntegerField(default=1)),
                 ('spreadsheet_numbered_from_1', models.IntegerField(default=1)),
                 ('is_completed', models.BooleanField(default=False)),
-                ('content', models.ForeignKey(to='contenttypes.ContentType')),
+                ('content', models.ForeignKey(to='contenttypes.ContentType', on_delete=models.CASCADE)),
             ],
         ),
     ]

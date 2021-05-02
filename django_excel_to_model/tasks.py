@@ -23,9 +23,9 @@ def import_excel():
         cmd = "%s manage.py import_excel_according_to_model %s %d %d %d %d" % \
               (sys.executable, full_path, task.content.pk, task.header_row_numbered_from_1,
                task.next_process_line_numbered_from_1, PROCESS_NUMBER_IN_ONE_TURN)
-        print 'executing: ', cmd
+        print('executing: ', cmd)
         res = os.system(cmd)
-        print "execute result:", res
+        print("execute result:", res)
         if res != 0:
             task.is_completed = True
             # task.next_process_line_numbered_from_1 = 0

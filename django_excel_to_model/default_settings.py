@@ -2,6 +2,9 @@ if 'INSTALLED_APPS' not in locals()["__builtins__"]:
     INSTALLED_APPS = []
 
 INSTALLED_APPS += (
+    'bootstrap3',
+    'django_admin_bootstrapped',
+    'jquery',
     'pinax.eventlog',  # Not mandatory
     'bootstrapform',
     'django.contrib.staticfiles',
